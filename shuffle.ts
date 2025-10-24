@@ -1,9 +1,9 @@
 export function shuffle(array: any[]): any[] {
-    let shuffled = array;
+    let shuffled = [...array];
 
     let currentIndex = shuffled.length;
 
-    while (currentIndex != 0) {
+    while (currentIndex !== 0) {
         let randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
 
