@@ -1,0 +1,19 @@
+{
+  "name": "musicstreamer",
+  "version": "1.0.0",
+  "description": "Streams music on localhost. Change port in config file",
+  "license": "UNLICENSED",
+  "author": "Jackson",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No test specified\"",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.12"
+  }
+}
