@@ -81,6 +81,7 @@ export class Radio {
 
         const throttle = new Throttle({
             rate: bitrate / 8,
+            chunksize: bitrate / 8,
         });
 
         readable.pipe(throttle)
@@ -90,7 +91,7 @@ export class Radio {
             .on("end", () => {
                 this.next();
                 this.setStreamStatus(StreamStatus.INACTIVE);
-                this.start();
+                setImmediate(() => this.start());
             });
     }
 
