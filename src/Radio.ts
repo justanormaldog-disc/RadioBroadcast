@@ -1,9 +1,9 @@
 import { PassThrough } from "stream";
 import Song from "./Song.js";
-import { Queue, QueueElement } from "./Queue.js";
+import { Queue } from "./Queue.js";
 import { shuffle } from "./shuffle.js";
 import { Throttle } from "stream-throttle";
-import { createReadStream, read, ReadStream } from "fs";
+import { createReadStream, ReadStream } from "fs";
 import ResponseSink from "./ResponseSink.js";
 
 type SongList = Song[];
@@ -11,14 +11,15 @@ type SongList = Song[];
 enum StreamStatus {
     INACTIVE,
     ACTIVE,
-    ERROR,
+    FATALERROR,
 }
 
 interface config {
     loop: boolean,
     shuffle: boolean,
+    bufferSize: number,
+    RING_BUFFER_MS: number,
 }
-
 
 /**
  * A class implementation for a continuous stream akin to a radio station
@@ -26,6 +27,13 @@ interface config {
 export class Radio {
     private streamStart: number | null;
     private _streamStatus: StreamStatus;
+
+    private buffer: PassThrough | null;
+    private bufferKb: number;
+
+    private bufferedChunks: Buffer[];
+    private totalBufferedBytes: number;
+
     queue: Queue<Song>;
     songs: SongList;
     config: config;
@@ -33,6 +41,11 @@ export class Radio {
     stream: ReadStream | null;
     throttle: Throttle | null;
 
+    /**
+     * 
+     * @param songs List of songs to play
+     * @param config {@link config Configuration interface}
+     */
     constructor(songs: SongList, config: config) {
         this.streamStart = null;
         this._streamStatus = StreamStatus.INACTIVE;
@@ -44,6 +57,13 @@ export class Radio {
 
         this.stream = null;
         this.throttle = null;
+
+        this.buffer = null;
+        this.bufferKb = config.bufferSize;
+
+        this.bufferedChunks = [];
+        this.totalBufferedBytes = 0;
+
 
         this.sinks = []; // list of listeners to write data to
     }
@@ -59,32 +79,68 @@ export class Radio {
         this.streamStart = Date.now();
         this.setStreamStatus(StreamStatus.ACTIVE);
 
-        const current = this.current();
+        let current = this.current();
 
         if (!current) {
-            console.warn("No songs are in queue.");
-            this.setStreamStatus(StreamStatus.INACTIVE);
-            return;
+            if (!this.config.loop || this.songs.length === 0) {
+                console.warn("No songs are in queue.");
+                this.setStreamStatus(StreamStatus.INACTIVE);
+                return;
+            }
+
+            let songs = this.config.shuffle ? shuffle(this.songs) : this.songs;
+
+            /* 
+            Do not switch to reassignment, it will not work 
+            as expected as all references to this queue will break.
+            */
+            songs.forEach((song: Song) => this.queue.enqueue(song));
+            current = this.current()!; // this will only be null if this.songs.length === 0.
         }
 
         const bitrate = current.bitrate;
+        const byterate = bitrate / 8;
+
+        const readable = createReadStream(current.dir);
+ 
         if (bitrate === 0) throw new Error(`Bitrate is 0: ${current.dir}`);
 
-        this.throttle = new Throttle({
-            rate: bitrate / 8,
+        const throttle = new Throttle({
+            rate: byterate,
         });
 
-        this.stream = createReadStream(current.dir);
+        this.buffer = new PassThrough({
+            highWaterMark: this.bufferKb * 1024
+        });
 
-        this.stream.pipe(this.throttle)
-            .on("data", (chunk: any) => {
+        readable.pipe(throttle).pipe(this.buffer);
+
+        this.buffer
+            .on("data", (chunk: Buffer) => {
                 this.broadcastToAllSinks(chunk);
+
+                // save in buffered chunks for replay when a new sink connects
+                this.bufferedChunks.push(chunk);
+                this.totalBufferedBytes += chunk.length;
+
+                // trim to max size
+                while (this.totalBufferedBytes > this.config.RING_BUFFER_MS * (byterate / 1000)) {
+                    const removed: Buffer = this.bufferedChunks.shift()!;
+                    this.totalBufferedBytes -= removed.length;
+                }
             })
             .on("end", () => {
                 this.next();
                 this.setStreamStatus(StreamStatus.INACTIVE);
-                this.start();
-            });
+
+                setImmediate(() => this.start());
+            })
+            .on("error", err => {
+                console.error(err);
+                
+                this.next();
+                setImmediate(() => this.start());
+            })
     }
 
     /**
@@ -164,6 +220,12 @@ export class Radio {
     createResponseSink(): ResponseSink {
         const responseSink = new ResponseSink();
         this.sinks.push(responseSink);
+
+        // write last 5 seconds of data as a buffer
+        for (const chunk of this.bufferedChunks) {
+            responseSink.write(chunk)
+        }
+
         return responseSink;
     }
 
@@ -182,7 +244,7 @@ export class Radio {
     /**
      * Writes to every sink.
      */
-    private broadcastToAllSinks(chunk: any) {
+    private broadcastToAllSinks(chunk: Buffer) {
         for (const sink of this.sinks) {
             sink.write(chunk);
         }

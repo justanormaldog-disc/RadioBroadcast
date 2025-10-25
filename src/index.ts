@@ -14,6 +14,8 @@ let defaultConfig = {
     SONGS_DIR: "/songs",
     LOOP: true,
     SHUFFLE: true,
+    BUFFER_KB: 256,
+    RING_BUFFER_MS: 10000,
 }
 
 // Fetch configuration file
@@ -27,7 +29,9 @@ try {
         config?.PORT === undefined ||
         config?.SONGS_DIR === undefined ||
         config?.LOOP === undefined ||
-        config?.SHUFFLE === undefined
+        config?.SHUFFLE === undefined ||
+        config?.BUFFER_KB === undefined ||
+        config ?.RING_BUFFER_MS === undefined
     ) {
         throw new Error();
     }
@@ -55,7 +59,16 @@ async function getAllSongs(): Promise<Song[]> {
 }
 
 // initialise radio
-const radio = new Radio(await getAllSongs(), { loop: config.LOOP, shuffle: config.SHUFFLE });
+const radio = new Radio(
+    await getAllSongs(), 
+    { 
+        loop: config.LOOP,
+        shuffle: config.SHUFFLE,
+        bufferSize: config.BUFFER_KB,
+        RING_BUFFER_MS: config.RING_BUFFER_MS,
+    }
+);
+
 radio.start();
 
 // init gui
