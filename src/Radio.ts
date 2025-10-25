@@ -55,12 +55,23 @@ export class Radio {
         this.streamStart = Date.now();
         this.setStreamStatus(StreamStatus.ACTIVE);
 
-        const current = this.current();
+        let current = this.current();
 
         if (!current) {
-            console.warn("No songs are in queue.");
-            this.setStreamStatus(StreamStatus.INACTIVE);
-            return;
+            if (!this.config.loop || this.songs.length === 0) {
+                console.warn("No songs are in queue.");
+                this.setStreamStatus(StreamStatus.INACTIVE);
+                return;
+            }
+
+            let songs = this.config.shuffle ? shuffle(this.songs) : this.songs;
+
+            /* 
+            Do not switch to reassignment, it will not work 
+            as expected as all references to this queue will break.
+            */
+            songs.forEach((song: Song) => this.queue.enqueue(song));
+            current = this.current()!; // this will only be null if this.songs.length === 0.
         }
 
         const bitrate = current.bitrate;
