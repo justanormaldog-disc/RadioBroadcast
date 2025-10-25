@@ -3,7 +3,7 @@ import Song from "./Song.js";
 import { Queue, QueueElement } from "./Queue.js";
 import { shuffle } from "./shuffle.js";
 import { Throttle } from "stream-throttle";
-import { createReadStream } from "fs";
+import { createReadStream, read, ReadStream } from "fs";
 import ResponseSink from "./ResponseSink.js";
 
 type SongList = Song[];
@@ -30,6 +30,8 @@ export class Radio {
     songs: SongList;
     config: config;
     sinks: ResponseSink[];
+    stream: ReadStream | null;
+    throttle: Throttle | null;
 
     constructor(songs: SongList, config: config) {
         this.streamStart = null;
@@ -40,6 +42,8 @@ export class Radio {
         this.songs = config.shuffle ? shuffle(songs) : songs;
         this.queue = new Queue(this.songs);
 
+        this.stream = null;
+        this.throttle = null;
 
         this.sinks = []; // list of listeners to write data to
     }
@@ -64,15 +68,15 @@ export class Radio {
         }
 
         const bitrate = current.bitrate;
-        const readable = createReadStream(current.dir);
- 
         if (bitrate === 0) throw new Error(`Bitrate is 0: ${current.dir}`);
 
-        const throttle = new Throttle({
+        this.throttle = new Throttle({
             rate: bitrate / 8,
         });
 
-        readable.pipe(throttle)
+        this.stream = createReadStream(current.dir);
+
+        this.stream.pipe(this.throttle)
             .on("data", (chunk: any) => {
                 this.broadcastToAllSinks(chunk);
             })
@@ -81,6 +85,23 @@ export class Radio {
                 this.setStreamStatus(StreamStatus.INACTIVE);
                 this.start();
             });
+    }
+
+    /**
+     * Destroys the stream.
+     */
+    stop() {
+        if (!(this.stream && this.streamStatus() === StreamStatus.ACTIVE)) {
+            throw new Error("No stream is running");
+        }
+
+        this.stream.destroy();
+        this.throttle!.destroy();
+
+        this.stream = null;
+        this.throttle = null;
+
+        this.setStreamStatus(StreamStatus.INACTIVE);
     }
 
     /**
