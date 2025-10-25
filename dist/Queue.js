@@ -1,4 +1,4 @@
-export default class Queue {
+export class Queue {
     head;
     tail;
     _size;
@@ -88,7 +88,7 @@ export default class Queue {
         return new Queue();
     }
 }
-class QueueElement {
+export class QueueElement {
     next;
     value;
     constructor(v) {

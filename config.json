@@ -1,5 +1,6 @@
 {
     "PORT": 3000,
     "SONGS_DIR": "./songs",
-    "LOOP": true
+    "LOOP": true,
+    "SHUFFLE": true
 }

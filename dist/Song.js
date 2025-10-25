@@ -1,13 +1,16 @@
 import { parseFile } from "music-metadata";
+import path from "path";
 export default class Song {
     dir;
     title;
     artist;
+    filename;
     bitrate;
-    constructor(dir, title, artist, bitrate) {
+    constructor(dir, title, artist, filename, bitrate) {
         this.dir = dir;
         this.title = title;
         this.artist = artist;
+        this.filename = filename;
         this.bitrate = bitrate;
     }
     /**
@@ -19,9 +22,11 @@ export default class Song {
         const metadata = await parseFile(dir);
         const title = metadata.common.title;
         const artist = metadata.common.artist;
+        let filename = path.basename(dir);
+        filename ??= "";
         const bitrate = metadata.format.bitrate;
         if (bitrate === undefined)
             throw new Error("Bitrate is undefined.");
-        return new Song(dir, title, artist, bitrate);
+        return new Song(dir, title, artist, filename, bitrate);
     }
 }

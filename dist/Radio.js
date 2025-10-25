@@ -1,4 +1,4 @@
-import Queue from "./Queue.js";
+import { Queue } from "./Queue.js";
 import { shuffle } from "./shuffle.js";
 import { Throttle } from "stream-throttle";
 import { createReadStream } from "fs";
@@ -23,8 +23,8 @@ export class Radio {
         this.streamStart = null;
         this._streamStatus = StreamStatus.INACTIVE;
         this.config = config;
-        this.queue = new Queue(songs);
-        this.songs = songs;
+        this.songs = config.shuffle ? shuffle(songs) : songs;
+        this.queue = new Queue(this.songs);
         this.sinks = []; // list of listeners to write data to
     }
     /**
@@ -46,7 +46,6 @@ export class Radio {
         const readable = createReadStream(current.dir);
         if (bitrate === 0)
             throw new Error(`Bitrate is 0: ${current.dir}`);
-        console.log(bitrate);
         const throttle = new Throttle({
             rate: bitrate / 8,
         });
@@ -64,7 +63,21 @@ export class Radio {
      * Shuffles the queue.
      */
     shuffle() {
-        this.queue = new Queue(shuffle(this.queue.json()));
+        const shuffled = shuffle(this.queue.json());
+        /* DO NOT CHANGE TO REASSIGNMENT; THIS IS NOT EQUAL TO this.queue = new Queue(shuffled);
+
+        A reassignment will give the queue a new reference which will break the GUI as it WILL
+        be stuck with the old reference.
+        i.e DO NOT TOUCH
+        */
+        let current = this.queue.head;
+        for (let i = 0; i < shuffled.length; i++) {
+            if (current === null)
+                break;
+            current.value = shuffled[i];
+            if (current.next === null)
+                break;
+        }
     }
     next() {
         this.queue.dequeue();

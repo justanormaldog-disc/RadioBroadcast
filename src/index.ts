@@ -5,6 +5,7 @@ import { readdir } from "fs/promises";
 import path from "path";
 import { Radio } from "./Radio.js";
 import Song from "./Song.js";
+import { Gui } from "./Gui/Gui.js";
 
 const app = express();
 
@@ -12,6 +13,7 @@ let defaultConfig = {
     PORT: 3000,
     SONGS_DIR: "/songs",
     LOOP: true,
+    SHUFFLE: true,
 }
 
 // Fetch configuration file
@@ -24,7 +26,8 @@ try {
     if (
         config?.PORT === undefined ||
         config?.SONGS_DIR === undefined ||
-        config?.LOOP === undefined
+        config?.LOOP === undefined ||
+        config?.SHUFFLE === undefined
     ) {
         throw new Error();
     }
@@ -52,8 +55,12 @@ async function getAllSongs(): Promise<Song[]> {
 }
 
 // initialise radio
-const radio = new Radio(await getAllSongs(), { loop: config.LOOP });
+const radio = new Radio(await getAllSongs(), { loop: config.LOOP, shuffle: config.SHUFFLE });
 radio.start();
+
+// init gui
+const gui = new Gui(radio);
+setInterval(() => gui.update(), 100);
 
 app.get("/", async (req, res) => {
     res.writeHead(200, {
@@ -63,13 +70,13 @@ app.get("/", async (req, res) => {
     "Connection": "keep-alive"
     });
 
-    console.log(`Client connected [${(new Date()).toTimeString().split(' ')[0]}]`);
+    gui.log(`Client connected`);
 
     const sink = radio.createResponseSink();
     sink.pipe(res);
 
     res.on("close", () => {
-        console.log(`Client disconnected [${(new Date()).toTimeString().split(' ')[0]}]`);
+        gui.log(`Client disconnected`);
         radio.removeResponseSink(sink.id);
     })
 })

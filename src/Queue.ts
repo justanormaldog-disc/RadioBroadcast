@@ -1,4 +1,4 @@
-export default class Queue<T> {
+export class Queue<T> {
     head: QueueElement<T> | null;
     tail: QueueElement<T> | null;
     private _size: number;
@@ -107,7 +107,7 @@ export default class Queue<T> {
     }
 }
 
-class QueueElement<T> {
+export class QueueElement<T> {
     next: QueueElement<T> | null;
     value: T;
 
