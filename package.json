@@ -8,12 +8,18 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"No test specified\"",
-    "start": "node index.js"
+    "start": "tsc && node dist/index.js"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "music-metadata": "^11.9.0",
+    "stream-throttle": "^0.1.3"
   },
   "devDependencies": {
-    "@types/node": "^24.0.12"
+    "@tsconfig/node22": "^22.0.2",
+    "@types/express": "^5.0.4",
+    "@types/node": "^24.9.1",
+    "@types/stream-throttle": "^0.1.4",
+    "@types/throttle": "^1.0.5"
   }
 }
