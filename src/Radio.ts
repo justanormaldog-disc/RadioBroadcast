@@ -92,7 +92,14 @@ export class Radio {
                 this.next();
                 this.setStreamStatus(StreamStatus.INACTIVE);
                 setImmediate(() => this.start());
-            });
+            })
+            .on("error", err => {
+                console.error(err);
+                this.setStreamStatus(StreamStatus.ERROR);
+                
+                this.next();
+                setImmediate(() => this.start());
+            })
     }
 
     /**
