@@ -2,7 +2,7 @@ import blessed from "blessed";
 import {  Gui, Keys } from "./Gui.js";
 import TerminalBox from "./TerminalBox.js";
 import Screen from "./Screen.js";
-import { Radio } from "../Radio.js";
+import { Radio, StreamStatus } from "../Radio.js";
 
 export class Controls extends TerminalBox {
     constructor(config: blessed.Widgets.BoxOptions) {
@@ -12,7 +12,8 @@ export class Controls extends TerminalBox {
 
     setQueueTips() {
         this.box.content = `
-        ${Keys.SHUFFLE} - Shuffle queue
+        ${Keys.SHUFFLE} - Shuffle queue\n
+        ${Keys.START} - Start stream | ${Keys.STOP} - End stream
         `
     }
 }
@@ -39,9 +40,12 @@ export class ControlsHandler {
             this.gui.log("Shuffled queue");
         })
 
-        screen.key("y", () => {
-            this.gui.log("Updated GUI");
-            this.gui.update();
+        screen.key("p", () => {
+            if (this.radio.streamStatus() === StreamStatus.INACTIVE) this.radio.start();
+        })
+
+        screen.key("s", () => {
+            if (this.radio.streamStatus() === StreamStatus.ACTIVE) this.radio.stop();
         })
     }
 }

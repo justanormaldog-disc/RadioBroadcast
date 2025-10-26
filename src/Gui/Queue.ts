@@ -22,7 +22,7 @@ export default class QueueBox extends TerminalBox {
         let current: QueueElement<Song> | null = this.queue.head;
         let str = "";
         while (current) {
-            str += `${current.value.filename}\n`;
+            str += `${current.value.filename.full}\n`;
             current = current.next;
         }
 

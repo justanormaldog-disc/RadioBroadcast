@@ -8,7 +8,7 @@ import ResponseSink from "./ResponseSink.js";
 
 type SongList = Song[];
 
-enum StreamStatus {
+export enum StreamStatus {
     INACTIVE,
     ACTIVE,
     FATALERROR,

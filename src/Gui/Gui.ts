@@ -4,9 +4,13 @@ import { Controls, ControlsHandler } from "./Controls.js";
 import QueueBox from "./Queue.js";
 import Screen from "./Screen.js";
 import Log from "./Log.js";
+import config from "./config.js";
+import NowPlaying from "./NowPlaying.js";
 
 export enum Keys {
     SHUFFLE = "x",
+    START = "p",
+    STOP = "s",
 }
 
 export class Gui {
@@ -15,67 +19,24 @@ export class Gui {
     queue: QueueBox;
     screen: Screen;
     logBox: Log;
+    nowPlaying: NowPlaying;
 
     constructor(radio: Radio) {
         this.radio = radio;
 
         this.screen = new Screen();
-        this.controls = new Controls(
-            {
-                label: 'Controls',
-                border: { type: 'line' },
-                top: '85%',
-                left: '50%',
-                width: '50%',
-                height: 5,
-                style: {
-                    fg: 'white',
-                    bg: 'transparent',
-                    border: {
-                        fg: '#f0f0f0',
-                        bg: "#181818"
-                    }
-                }
-            }
-        );
+        this.controls = new Controls(config.controls as blessed.Widgets.BoxOptions);
         
         this.queue = new QueueBox(
-            {
-                border: { type: 'line' },
-                top: 0,
-                left: '50%',
-                width: '50%',
-                height: '70%',
-                scrollable: true,
-                label: 'Queue',
-                style: {
-                    fg: 'white',
-                    bg: 'transparent',
-                    border: {
-                        fg: '#f0f0f0',
-                        bg: "#181818",
-                    }
-                }
-            }, 
+            config.queueBox as blessed.Widgets.BoxOptions, 
             radio.queue
         );
 
-        this.logBox = new Log(
-             {
-                label: 'Log',
-                border: { type: 'line' },
-                left: 0,
-                width: '50%',
-                height: "100%",
-                style: {
-                    fg: 'white',
-                    bg: 'transparent',
-                    border: {
-                        fg: '#f0f0f0',
-                        bg: "#181818"
-                    }
-                }
-            }
+        this.logBox = new Log(config.log as blessed.Widgets.BoxOptions);
+
+        this.nowPlaying = new NowPlaying(
+            config.nowPlaying as blessed.Widgets.BoxOptions,
+            radio
         )
 
         new ControlsHandler(this);
@@ -83,6 +44,7 @@ export class Gui {
         this.screen.screen.append(this.controls.box);
         this.screen.screen.append(this.queue.box);
         this.screen.screen.append(this.logBox.box);
+        this.screen.screen.append(this.nowPlaying.box);
 
         this.screen.render();
     }
@@ -90,12 +52,17 @@ export class Gui {
     update() {
         this.queue.update();
 
-        let title = this.radio.current()?.filename;
+        let title = this.radio.current()?.filename.noExtension;
         title ??= "";
         this.setTitle(title);
         
         this.screen.render();
     }
+
+    updateSongProgress(readBytes: number) {
+
+    }
+
     /**
      * Logs to the console in the terminal GUI.
      */
