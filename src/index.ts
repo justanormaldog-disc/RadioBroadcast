@@ -59,9 +59,13 @@ async function getAllSongs(): Promise<Song[]> {
     return await Promise.all(files);
 }
 
+async function transcodeAllSongs(): Promise<Song[]> {
+    return await transcodeSongs(await getAllSongs());
+}
+
 // initialise radio
 const radio = new Radio(
-    await getAllSongs(), 
+    await transcodeAllSongs(), 
     { 
         loop: config.LOOP,
         shuffle: config.SHUFFLE,
