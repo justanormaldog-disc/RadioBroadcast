@@ -10,6 +10,8 @@ import { transcodeSongs } from "./transcode.js";
 
 const app = express();
 
+console.log("Starting Server... ");
+
 let defaultConfig = {
     PORT: 3000,
     SONGS_DIR: "/songs",
@@ -22,6 +24,8 @@ let defaultConfig = {
 // Fetch configuration file
 
 let config;
+
+console.log("Parsing config.json... (1/3)");
 
 try {
     config = JSON.parse(readFileSync("./config.json", "utf8"));
@@ -50,11 +54,13 @@ try {
     throw new Error("Property SONGS_DIR is not a valid path in config.json");
 }
 
+
+
 async function getAllSongs(): Promise<Song[]> {
     const dirEntries = await readdir(SONGS_DIR, { withFileTypes: true });
     const files = dirEntries
         .filter(dirent => dirent.isFile())
-        .map(async dirent => await Song.create(path.join(SONGS_DIR, dirent.name)));
+        .map(async dirent => await Song.create(path.resolve(path.join(SONGS_DIR, dirent.name))));
 
     return await Promise.all(files);
 }
@@ -63,9 +69,13 @@ async function transcodeAllSongs(): Promise<Song[]> {
     return await transcodeSongs(await getAllSongs());
 }
 
+console.log("Transcoding songs... (2/3)");
+const transcodedSongs = await transcodeAllSongs();
+console.log("Initalising radio... (3/3)");
+
 // initialise radio
 const radio = new Radio(
-    await transcodeAllSongs(), 
+    transcodedSongs, 
     { 
         loop: config.LOOP,
         shuffle: config.SHUFFLE,
@@ -74,6 +84,7 @@ const radio = new Radio(
     }
 );
 
+console.log("Ready.");
 radio.start();
 
 // init gui

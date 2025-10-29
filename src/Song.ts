@@ -2,6 +2,7 @@ import { stat  } from "fs/promises";
 import { parse } from "path";
 import { parseFile } from "music-metadata";
 import path from "path";
+import { existsSync } from "fs";
 
 interface Filename {
     full: string | undefined,
@@ -24,6 +25,7 @@ export default class Song {
      * This static method should be used to construct a new instance instead of the new keyword.
      */
     static async create(dir: string): Promise<Song> {
+        if (!existsSync(path.resolve(dir))) throw new Error("Argument dir is an invalid path");
         const metadata = await parseFile(dir);
 
         
