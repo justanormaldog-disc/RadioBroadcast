@@ -1,4 +1,4 @@
-import blessed from "blessed";
+import blessed from "neo-blessed";
 import { Radio } from "../Radio.js";
 import { Controls, ControlsHandler } from "./Controls.js";
 import QueueBox from "./Queue.js";
@@ -60,7 +60,7 @@ export class Gui {
     }
 
     updateSongProgress(readBytes: number) {
-
+        this.nowPlaying.update(readBytes);
     }
 
     /**

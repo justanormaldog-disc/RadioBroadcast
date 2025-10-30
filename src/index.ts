@@ -10,7 +10,7 @@ import { transcodeSongs } from "./transcode.js";
 
 const app = express();
 
-console.log("Starting Server... ");
+console.log("Starting server... ");
 
 let defaultConfig = {
     PORT: 3000,
@@ -89,7 +89,11 @@ radio.start();
 
 // init gui
 const gui = new Gui(radio);
-setInterval(() => gui.update(), 100);
+
+setInterval(() => {
+    gui.update();
+    gui.updateSongProgress(radio.readBytes);
+}, 100);
 
 app.get("/", async (req, res) => {
     res.writeHead(200, {

@@ -1,4 +1,4 @@
-import blessed from "blessed";
+import blessed from "neo-blessed";
 
 export default class Screen {
     screen: blessed.Widgets.Screen;

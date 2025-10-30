@@ -64,16 +64,22 @@ export default {
         }
     },
     progressBar: {
-        top: 'center',
+        fg: "blue",
+        bg: "white",
+        top: "50%",
         left: 'center',
-        width: '50%',
+        width: '90%',
         height: 1,
         orientation: 'horizontal', // or 'vertical'
         style: {
-            bg: 'grey', // Background color of the entire bar
+            bg: 'white', // Background color of the entire bar
             bar: {
-                bg: 'blue', // Color of the filled portion of the bar
-                fg: 'white' // Foreground color (e.g., for text if pch is used)
+                bg: 'white', // Color of the filled portion of the bar
+                fg: 'blue' // Foreground color (e.g., for text if pch is used)
+            },
+            border: {
+                fg: "white",
+                bg: "white"
             }
         },
         pch: '█', // Character to fill the bar with (e.g., a solid block)

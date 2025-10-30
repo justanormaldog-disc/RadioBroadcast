@@ -34,13 +34,15 @@ export class Radio {
     private bufferedChunks: Buffer[];
     private totalBufferedBytes: number;
 
+    readBytes: number;
+
     queue: Queue<Song>;
     songs: SongList;
     config: config;
     sinks: ResponseSink[];
     stream: ReadStream | null;
     throttle: Throttle | null;
-
+    
     /**
      * 
      * @param songs List of songs to play
@@ -54,6 +56,8 @@ export class Radio {
 
         this.songs = config.shuffle ? shuffle(songs) : songs;
         this.queue = new Queue(this.songs);
+
+        this.readBytes = 0;
 
         this.stream = null;
         this.throttle = null;
@@ -98,6 +102,8 @@ export class Radio {
             current = this.current()!; // this will only be null if this.songs.length === 0.
         }
 
+        this.readBytes = 0;
+
         const bitrate = current.bitrate;
         const byterate = bitrate / 8;
 
@@ -122,12 +128,14 @@ export class Radio {
                 // save in buffered chunks for replay when a new sink connects
                 this.bufferedChunks.push(chunk);
                 this.totalBufferedBytes += chunk.length;
-
+                this.readBytes += chunk.length;
                 // trim to max size
                 while (this.totalBufferedBytes > this.config.RING_BUFFER_MS * (byterate / 1000)) {
                     const removed: Buffer = this.bufferedChunks.shift()!;
                     this.totalBufferedBytes -= removed.length;
                 }
+
+                
             })
             .on("end", () => {
                 this.next();

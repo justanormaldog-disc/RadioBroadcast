@@ -1,4 +1,4 @@
-import blessed from "blessed";
+import blessed from "neo-blessed";
 import {  Gui, Keys } from "./Gui.js";
 import TerminalBox from "./TerminalBox.js";
 import Screen from "./Screen.js";
