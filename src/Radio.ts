@@ -40,7 +40,6 @@ export class Radio {
     songs: SongList;
     config: config;
     sinks: ResponseSink[];
-    stream: ReadStream | null;
     throttle: Throttle | null;
     
     /**
@@ -59,7 +58,6 @@ export class Radio {
 
         this.readBytes = 0;
 
-        this.stream = null;
         this.throttle = null;
 
         this.buffer = null;
@@ -81,7 +79,6 @@ export class Radio {
         }
 
         this.streamStart = Date.now();
-        this.setStreamStatus(StreamStatus.ACTIVE);
 
         let current = this.current();
 
@@ -111,15 +108,19 @@ export class Radio {
  
         if (bitrate === 0) throw new Error(`Bitrate is 0: ${current.dir}`);
 
-        const throttle = new Throttle({
+        const throttle = this.throttle = new Throttle({
             rate: byterate,
         });
+
+        
 
         this.buffer = new PassThrough({
             highWaterMark: this.bufferKb * 1024
         });
 
         readable.pipe(throttle).pipe(this.buffer);
+
+        this.setStreamStatus(StreamStatus.ACTIVE);
 
         this.buffer
             .on("data", (chunk: Buffer) => {
@@ -155,14 +156,14 @@ export class Radio {
      * Destroys the stream.
      */
     stop() {
-        if (!(this.stream && this.streamStatus() === StreamStatus.ACTIVE)) {
+        if (this.streamStatus() !== StreamStatus.ACTIVE) {
             throw new Error("No stream is running");
         }
 
-        this.stream.destroy();
+        this.buffer!.destroy();
         this.throttle!.destroy();
 
-        this.stream = null;
+        this.buffer = null;
         this.throttle = null;
 
         this.setStreamStatus(StreamStatus.INACTIVE);

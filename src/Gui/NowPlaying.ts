@@ -1,7 +1,7 @@
 import TerminalBox from "./TerminalBox.js";
 import blessed from "neo-blessed";
 import configStyles from "./config.js";
-import { Radio } from "../Radio.js";
+import { Radio, StreamStatus } from "../Radio.js";
 import { Keys } from "./Gui.js";
 
 export default class NowPlaying extends TerminalBox {
@@ -46,9 +46,17 @@ export default class NowPlaying extends TerminalBox {
         this.box.append(progressBar);
     }
 
-    update(readBytes: number) {
+    update(readBytes: number, state: StreamStatus): void {
         const current = this.radio.current();
         
+        if (state === StreamStatus.INACTIVE) {
+            this.nowPlayingText.setContent(`Stopped`);
+            this.elapsed.setContent(`--:--`)
+            this.duration.setContent(`--:--`);
+            this.progressBar.setProgress(0);
+            return;
+        }
+
         if (current) {
             const totalBytes = current.bytes;
             const totalBits = totalBytes * 8;

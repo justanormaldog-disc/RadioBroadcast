@@ -92,7 +92,7 @@ const gui = new Gui(radio);
 
 setInterval(() => {
     gui.update();
-    gui.updateSongProgress(radio.readBytes);
+    gui.updateSongProgress(radio.readBytes, radio.streamStatus());
 }, 100);
 
 app.get("/", async (req, res) => {
