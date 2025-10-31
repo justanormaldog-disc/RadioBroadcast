@@ -6,6 +6,8 @@ import { fileURLToPath } from "url";
 import { convert } from "./FFmpeg.js";
 import { MAX_FFMPEG_WORKER_THREADS } from "./index.js";
 
+import { ConsoleContext } from "./Console.js";
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUTPUT_PATH = path.resolve(path.join(__dirname, "../output"));
 
@@ -43,7 +45,7 @@ function waitTillInstanceIsFree(): Promise<void> {
 async function transcode(song: Song): Promise<Song> {
     await waitTillInstanceIsFree();
     instances++;
-    console.log(`Starting: instances (${instances} of max ${MAX_FFMPEG_WORKER_THREADS})`);
+    ConsoleContext.log(`Starting: instances (${instances} of max ${MAX_FFMPEG_WORKER_THREADS})`);
     const outputFilePath = path.join(OUTPUT_PATH, `${song.filename.noExtension}.mp3`);
 
     // exit if file is already mp3

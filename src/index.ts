@@ -7,10 +7,10 @@ import { Radio } from "./Radio.js";
 import Song from "./Song.js";
 import { Gui } from "./Gui/Gui.js";
 import { transcodeSongs } from "./transcode.js";
-
+import { ConsoleContext } from "./Console.js";
 const app = express();
 
-console.log("Starting server... ");
+ConsoleContext.log("Starting server... ");
 
 interface ConfigInterface {
     PORT: number,
@@ -58,7 +58,7 @@ const requiredProperties: PropertyKey[] = [
 
 let config: ConfigInterface = defaultConfig;
 
-console.log("Parsing config.json... (1/3)");
+ConsoleContext.log("Parsing config.json... (1/3)");
 
 try {
     const parsed: ParsedConfigInterface = JSON.parse(readFileSync("./config.json", "utf8"));
@@ -66,11 +66,11 @@ try {
 
     for (let prop in parsed) {
         if (prop == null) {
-            console.warn(`Fallback property value used for property ${prop} in config.json. Fallback value is ${defaultConfig[prop]}.`);
+            ConsoleContext.warn(`Fallback property value used for property ${prop} in config.json. Fallback value is ${defaultConfig[prop]}.`);
         }
     }
 } catch {
-    console.error("Could not parse config file. Config is now set to fallback.");
+    ConsoleContext.error(new Error("Could not parse config file. Config is now set to fallback."));
     config = defaultConfig;
 }
 
@@ -99,9 +99,9 @@ async function transcodeAllSongs(): Promise<Song[]> {
     return await transcodeSongs(await getAllSongs());
 }
 
-console.log("Transcoding songs... (2/3)");
+ConsoleContext.log("Transcoding songs... (2/3)");
 const transcodedSongs = await transcodeAllSongs();
-console.log("Initalising radio... (3/3)");
+ConsoleContext.log("Initalising radio... (3/3)");
 
 // initialise radio
 const radio = new Radio(
@@ -114,11 +114,12 @@ const radio = new Radio(
     }
 );
 
-console.log("Ready.");
+ConsoleContext.log("Ready.");
 radio.start();
 
 // init gui
 const gui = new Gui(radio);
+ConsoleContext.setGuiContext(gui);
 
 setInterval(() => {
     gui.update();
@@ -145,5 +146,5 @@ app.get("/", async (req, res) => {
 })
 
 app.listen(PORT, () => {
-    console.log(`Streaming at http://localhost:${PORT}`);
+    ConsoleContext.log(`Streaming at http://localhost:${PORT}`);
 })

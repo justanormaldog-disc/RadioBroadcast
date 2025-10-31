@@ -3,6 +3,7 @@ import {  Gui, Keys } from "./Gui.js";
 import TerminalBox from "./TerminalBox.js";
 import Screen from "./Screen.js";
 import { Radio, StreamStatus } from "../Radio.js";
+import { ConsoleContext } from "../Console.js";
 
 export class Controls extends TerminalBox {
     constructor(config: blessed.Widgets.BoxOptions) {
@@ -37,7 +38,7 @@ export class ControlsHandler {
             this.radio.shuffle();
             this.gui.queue.update();
             this.gui.screen.render();
-            this.gui.log("Shuffled queue");
+            ConsoleContext.log("Shuffled queue");
         })
 
         screen.key("p", () => {

@@ -6,6 +6,8 @@ import { Throttle } from "stream-throttle";
 import { createReadStream, ReadStream } from "fs";
 import ResponseSink from "./ResponseSink.js";
 
+import { ConsoleContext } from "./Console.js";
+
 type SongList = Song[];
 
 export enum StreamStatus {
@@ -84,7 +86,7 @@ export class Radio {
 
         if (!current) {
             if (!this.config.loop || this.songs.length === 0) {
-                console.warn("No songs are in queue.");
+                ConsoleContext.warn("No songs are in queue.");
                 this.setStreamStatus(StreamStatus.INACTIVE);
                 return;
             }
@@ -145,7 +147,7 @@ export class Radio {
                 setImmediate(() => this.start());
             })
             .on("error", err => {
-                console.error(err);
+                ConsoleContext.error(err);
                 
                 this.next();
                 setImmediate(() => this.start());
