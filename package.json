@@ -2,7 +2,7 @@
   "name": "musicstreamer",
   "version": "1.0.0",
   "description": "Streams music on localhost. Change port in config file",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "author": "Jackson",
   "type": "module",
   "main": "index.js",
@@ -21,7 +21,6 @@
     "@types/blessed": "^0.1.25",
     "@types/express": "^5.0.4",
     "@types/node": "^24.9.1",
-    "@types/stream-throttle": "^0.1.4",
-    "@types/throttle": "^1.0.5"
+    "@types/stream-throttle": "^0.1.4"
   }
 }
