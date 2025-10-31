@@ -12,33 +12,62 @@ const app = express();
 
 console.log("Starting server... ");
 
-let defaultConfig = {
+interface ConfigInterface {
+    PORT: number,
+    SONGS_DIR: string,
+    LOOP: boolean,
+    SHUFFLE: boolean,
+    BUFFER_KB: number,
+    RING_BUFFER_MS: number,
+    MAX_FFMPEG_WORKER_THREADS: number,
+}
+
+interface ParsedConfigInterface {
+    PORT: number | undefined,
+    SONGS_DIR: string | undefined,
+    LOOP: boolean | undefined,
+    SHUFFLE: boolean | undefined,
+    BUFFER_KB: number | undefined,
+    RING_BUFFER_MS: number | undefined,
+    MAX_FFMPEG_WORKER_THREADS: number | undefined,
+}
+
+let defaultConfig: ConfigInterface = {
     PORT: 3000,
     SONGS_DIR: "/songs",
     LOOP: true,
     SHUFFLE: true,
     BUFFER_KB: 256,
     RING_BUFFER_MS: 10000,
+    MAX_FFMPEG_WORKER_THREADS: 5
 }
+
+type PropertyKey = "PORT" | "SONGS_DIR" | "LOOP" | "SHUFFLE" | "BUFFER_KB" | "RING_BUFFER_MS" | "MAX_FFMPEG_WORKER_THREADS";
+
+const requiredProperties: PropertyKey[] = [
+    "PORT",
+    "SONGS_DIR",
+    "LOOP",
+    "SHUFFLE",
+    "BUFFER_KB",
+    "RING_BUFFER_MS",
+    "MAX_FFMPEG_WORKER_THREADS",
+]
 
 // Fetch configuration file
 
-let config;
+let config: ConfigInterface = defaultConfig;
 
 console.log("Parsing config.json... (1/3)");
 
 try {
-    config = JSON.parse(readFileSync("./config.json", "utf8"));
+    const parsed: ParsedConfigInterface = JSON.parse(readFileSync("./config.json", "utf8"));
+    Object.assign(config, parsed);
 
-    if (
-        config?.PORT === undefined ||
-        config?.SONGS_DIR === undefined ||
-        config?.LOOP === undefined ||
-        config?.SHUFFLE === undefined ||
-        config?.BUFFER_KB === undefined ||
-        config ?.RING_BUFFER_MS === undefined
-    ) {
-        throw new Error();
+    for (let prop in parsed) {
+        if (prop == null) {
+            console.warn(`Fallback property value used for property ${prop} in config.json. Fallback value is ${defaultConfig[prop]}.`);
+        }
     }
 } catch {
     console.error("Could not parse config file. Config is now set to fallback.");
@@ -46,6 +75,7 @@ try {
 }
 
 const { PORT, SONGS_DIR } = config;
+export const { MAX_FFMPEG_WORKER_THREADS } = config;
 
 // validate path syntax
 try {

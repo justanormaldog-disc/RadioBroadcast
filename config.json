@@ -4,5 +4,6 @@
     "LOOP": true,
     "SHUFFLE": true,
     "BUFFER_KB": 512,
-    "RING_BUFFER_MS": 10000
+    "RING_BUFFER_MS": 10000,
+    "MAX_FFMPEG_WORKER_THREADS": 5
 }

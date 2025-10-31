@@ -4,10 +4,13 @@ import { existsSync } from "fs";
 import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { convert } from "./FFmpeg.js";
+import { MAX_FFMPEG_WORKER_THREADS } from "./index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUTPUT_PATH = path.resolve(path.join(__dirname, "../output"));
-    
+
+let instances: number = 0;
+
 /**
  * Transcodes songs to MP3
  */
@@ -25,7 +28,22 @@ export async function transcodeSongs(songs: Song[]): Promise<Song[]> {
     return Promise.all(outputSongs);
 }
 
+function waitTillInstanceIsFree(): Promise<void> {
+    return new Promise((resolve) => {
+        const interval = setInterval(callback, 50);
+
+        function callback() {
+            if (instances < MAX_FFMPEG_WORKER_THREADS) {
+                clearInterval(interval);
+                resolve();
+            }
+        }
+    });
+}
 async function transcode(song: Song): Promise<Song> {
+    await waitTillInstanceIsFree();
+    instances++;
+    console.log(`Starting: instances (${instances} of max ${MAX_FFMPEG_WORKER_THREADS})`);
     const outputFilePath = path.join(OUTPUT_PATH, `${song.filename.noExtension}.mp3`);
 
     // exit if file is already mp3
@@ -33,6 +51,7 @@ async function transcode(song: Song): Promise<Song> {
 
     await convert(song.dir, outputFilePath);
 
+    instances--;
     return Song.create(outputFilePath);
 }
 
