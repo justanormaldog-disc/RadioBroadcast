@@ -45,7 +45,7 @@ export class ControlsHandler {
         })
 
         screen.key("s", () => {
-            if (this.radio.streamStatus() === StreamStatus.ACTIVE) this.radio.stop();
+            if (this.radio.streamStatus() === StreamStatus.ACTIVE) this.radio.reset();
         })
     }
 }

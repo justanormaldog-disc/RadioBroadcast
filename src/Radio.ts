@@ -155,7 +155,7 @@ export class Radio {
     /**
      * Destroys the stream.
      */
-    stop() {
+    reset() {
         if (this.streamStatus() !== StreamStatus.ACTIVE) {
             throw new Error("No stream is running");
         }
@@ -173,8 +173,10 @@ export class Radio {
      * Shuffles the queue.
      */
     shuffle(): void {
+        this.reset();
+
         const shuffled = shuffle(this.queue.json());
-        
+
         /* DO NOT CHANGE TO REASSIGNMENT; THIS IS NOT EQUAL TO this.queue = new Queue(shuffled);
 
         A reassignment will give the queue a new reference which will break the GUI as it WILL
@@ -188,7 +190,10 @@ export class Radio {
             current.value = shuffled[i];
 
             if (current.next === null) break;
+            current = current.next;
         }
+
+        this.start();
     }
 
     next(): void {

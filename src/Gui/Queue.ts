@@ -21,6 +21,7 @@ export default class QueueBox extends TerminalBox {
         // Load file names in queue box
         let current: QueueElement<Song> | null = this.queue.head;
         let str = "";
+
         while (current) {
             str += `${current.value.filename.full}\n`;
             current = current.next;
