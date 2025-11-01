@@ -4,6 +4,7 @@ export enum ColourCodes {
     BLACK = 16,
     LIGHT_BLACK = 0,
     WHITE = 255,
+    GREEN = 10,
 }
 
 export const reset = () => "\x1b[0m";
