@@ -34,6 +34,7 @@ const loadingHandler = new LoadingHandler([
         parseConfig,
         "Parsing config.json",
         "config",
+        true,
         [
             CONFIG_PATH,
             defaultConfig
@@ -43,12 +44,14 @@ const loadingHandler = new LoadingHandler([
         transcodeAllSongs,
         "Transcoding songs",
         "transcode",
+        false,
         []
     ),
         new LoadEvent(
         initRadio,
         "Initalising radio",
         "radio",
+        true,
         []
     ),
 ]);

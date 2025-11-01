@@ -26,12 +26,14 @@ export class LoadEvent {
     name: string;
     id: string;
     parameters: any[];
+    dots: boolean;
 
-    constructor(callback: CallbackFn, name: string, id: string, parameters: any[]) {
+    constructor(callback: CallbackFn, name: string, id: string, dots: boolean, parameters: any[]) {
         this.callback = callback;
         this.name = name;
         this.id = id;
         this.parameters = parameters;
+        this.dots = dots;
     }
 }
 
@@ -56,6 +58,7 @@ export class LoadingHandler {
      *         callback: myCallback,
      *         name: "Loading my stuff",
      *         id: "my-id",
+     *         dots: true,
      *         parameters: [
      *             "param1"
      *         ]
@@ -83,10 +86,21 @@ export class LoadingHandler {
 
             const eventStart = performance.now();
 
-            const dotInterval = setInterval(() => {
-                const dots = Math.floor((performance.now() - eventStart) / 1000);
-                this.setStatus(".".repeat(dots));
-            }, 100);
+
+            let dotInterval: NodeJS.Timeout;
+
+            if (event.dots) {
+                dotInterval = setInterval(() => {
+                    if (!/./.test(this.status) && this.status) {
+                        clearInterval(dotInterval);
+
+                        return;
+                    }
+
+                    const dots = Math.floor((performance.now() - eventStart) / 1000);
+                    this.setStatus(".".repeat(dots));
+                }, 100);  
+            }
 
             const callback = this.loadEvent(event, results);
             callback
@@ -102,7 +116,7 @@ export class LoadingHandler {
                         ConsoleContext.raw(eraseline() + "\r");
                     }
                     // Clear dot interval
-                    clearInterval(dotInterval);
+                    if (event.dots) clearInterval(dotInterval);
 
                     // Erase the previous line (the loading message)
                     ConsoleContext.raw(prevline() + eraseline());
@@ -121,7 +135,7 @@ export class LoadingHandler {
         const wait: Promise<void> = new Promise((resolve) => {
             setTimeout(() => {
                 resolve();
-            }, 1000);
+            }, 2500);
         });
 
         await wait;

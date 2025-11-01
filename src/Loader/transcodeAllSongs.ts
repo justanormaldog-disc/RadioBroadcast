@@ -22,5 +22,5 @@ async function getAllSongs(SONGS_DIR: string): Promise<Song[]> {
 
 export async function transcodeAllSongs(handler: LoadingHandler, results: ResultMap): Promise<Song[]> {
     const SONGS_DIR = results.config.SONGS_DIR;
-    return await transcodeSongs(await getAllSongs(SONGS_DIR));
+    return await transcodeSongs(handler, await getAllSongs(SONGS_DIR));
 }
