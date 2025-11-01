@@ -33,7 +33,6 @@ export function convert(inputFile: string, outputFile: string): Promise<string> 
         ffmpeg.on("close", code => {
             if (code === 0) {
                 resolve(outputFile);
-                console.log(inputFile, outputFile);
             } else {
                 throw new Error(`FFmpeg exited with code: ${code}`);
             }

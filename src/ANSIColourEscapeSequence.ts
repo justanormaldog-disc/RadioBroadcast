@@ -13,9 +13,9 @@ export enum ColourCodes {
 export const reset = () => "\x1b[0m";
 
 /**
- * Move cursor to begging of previous line
+ * Move cursor up by {@link lines} lines.
  */
-export const prevline = () => "\x1b[#F";
+export const prevline = (lines: number = 1) => `\x1b[${lines}A`;
 
 /**
  * Erases the current line
@@ -35,6 +35,11 @@ export const save = () => "\x1b7";
  * Uses DEC standard.
  */
 export const restore = () => "\x1b8";
+
+/**
+ * Moves the cursor down {@link lines} number of times.
+ */
+export const nextline = (lines: number = 1) => `\x1b[${lines}B`;
 
 export const foreground = (code: ColourCodes): string => {
     return `\x1b[38;5;${code}m`;

@@ -20,6 +20,19 @@ class Console {
     };
 
     /**
+     * Logs message to  {@link Console._GuiContext GuiContext} if specified, else {@link process.stdout}.
+     * 
+     * Does not include linefeed.
+     */
+    raw(message: string | number): void {
+        if (this._GuiContext) {
+            this._GuiContext.log(message);
+        } else {
+            process.stdout.write(String(message));
+        }
+    };
+
+    /**
      * Logs message with SGR to format into a warning.
      */
     warn(message: string | number): void {
