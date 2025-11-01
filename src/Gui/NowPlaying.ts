@@ -1,7 +1,7 @@
 import TerminalBox from "./TerminalBox.js";
 import blessed from "neo-blessed";
 import configStyles from "./config.js";
-import { Radio, StreamStatus } from "../Radio.js";
+import { Radio, StreamStatus } from "../Radio/Radio.js";
 import { Keys } from "./Gui.js";
 
 export default class NowPlaying extends TerminalBox {

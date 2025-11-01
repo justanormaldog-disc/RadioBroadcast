@@ -1,4 +1,4 @@
-import Song from "./Song.js"
+import Song from "../Song.js"
 import path, { dirname } from "path";
 import { existsSync } from "fs";
 import fs from "fs/promises";

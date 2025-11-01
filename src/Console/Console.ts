@@ -1,5 +1,5 @@
 import { background, ColourCodes, foreground, reset } from "./ANSIColourEscapeSequence.js";
-import type { Gui } from "./Gui/Gui.js";
+import type { Gui } from "../Gui/Gui.js";
 
 class Console {
     private _GuiContext: Gui | null;

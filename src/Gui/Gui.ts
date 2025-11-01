@@ -1,5 +1,5 @@
 import blessed from "neo-blessed";
-import { Radio, StreamStatus } from "../Radio.js";
+import { Radio, StreamStatus } from "../Radio/Radio.js";
 import { Controls, ControlsHandler } from "./Controls.js";
 import QueueBox from "./Queue.js";
 import Screen from "./Screen.js";

@@ -1,5 +1,5 @@
-import { ColourCodes, eraseline, foreground, nextline, prevline, reset, restore, save } from "./ANSIColourEscapeSequence.js";
-import { ConsoleContext } from "./Console.js";
+import { ColourCodes, eraseline, foreground, nextline, prevline, reset, restore, save } from "../Console/ANSIColourEscapeSequence.js";
+import { ConsoleContext } from "../Console/Console.js";
 
 export type ResultMap = Record<string, any>;
 type CallbackFn = (handler: LoadingHandler, results: ResultMap, ...rest: any[]) => any;
@@ -45,7 +45,25 @@ export class LoadingHandler {
     }
 
     /**
-     * Loads all {@link LoadingHandler.events LoadEvents}
+     * Loads all {@link LoadingHandler.events LoadEvents}.
+     * @returns A map of the return values from the callbacks in each {@link loadingHandler.events LoadEvent}.
+     * 
+     * Accessing a return value
+     * @example 
+     * const handler = 
+     * new LoadHandler(
+     *     new LoadEvent(
+     *         callback: myCallback,
+     *         name: "Loading my stuff",
+     *         id: "my-id",
+     *         parameters: [
+     *             "param1"
+     *         ]
+     *     )
+     * );
+     * 
+     * const returnValues = await handler.load();
+     * console.log(returnValues["my-id"]); // Logs the return value of myCallback().
      */
     async load(): Promise<ResultMap> {
         const results: ResultMap = {};
@@ -103,7 +121,7 @@ export class LoadingHandler {
         const wait: Promise<void> = new Promise((resolve) => {
             setTimeout(() => {
                 resolve();
-            }, 10000);
+            }, 1000);
         });
 
         await wait;

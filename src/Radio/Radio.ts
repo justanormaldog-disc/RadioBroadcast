@@ -1,12 +1,12 @@
 import { PassThrough } from "stream";
-import Song from "./Song.js";
+import Song from "../Song.js";
 import { Queue } from "./Queue.js";
 import { shuffle } from "./shuffle.js";
 import { Throttle } from "stream-throttle";
 import { createReadStream, ReadStream } from "fs";
 import ResponseSink from "./ResponseSink.js";
 
-import { ConsoleContext } from "./Console.js";
+import { ConsoleContext } from "../Console/Console.js";
 
 type SongList = Song[];
 

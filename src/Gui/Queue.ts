@@ -1,6 +1,6 @@
 import blessed from "neo-blessed";
 import TerminalBox from "./TerminalBox.js";
-import { Queue, QueueElement } from "../Queue.js";
+import { Queue, QueueElement } from "../Radio/Queue.js";
 import Song from "../Song.js";
 
 export default class QueueBox extends TerminalBox {

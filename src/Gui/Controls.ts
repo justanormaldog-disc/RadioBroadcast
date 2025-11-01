@@ -2,8 +2,8 @@ import blessed from "neo-blessed";
 import {  Gui, Keys } from "./Gui.js";
 import TerminalBox from "./TerminalBox.js";
 import Screen from "./Screen.js";
-import { Radio, StreamStatus } from "../Radio.js";
-import { ConsoleContext } from "../Console.js";
+import { Radio, StreamStatus } from "../Radio/Radio.js";
+import { ConsoleContext } from "../Console/Console.js";
 
 export class Controls extends TerminalBox {
     constructor(config: blessed.Widgets.BoxOptions) {
